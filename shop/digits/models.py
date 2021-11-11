@@ -18,12 +18,12 @@ class Product(models.Model):
     class Meta:
         abstract = True
 
+    category = models.ForeignKey(Category, verbose_name='категория', on_delete=models.CASCADE)
     title = models.CharField(max_length=255, verbose_name='наименование товара')
     slug = models.SlugField(unique=True)
     image = models.ImageField(verbose_name='изображение')
     price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name='Цена')
     description = models.TextField(null=True, verbose_name='описание товара')
-    category = models.ForeignKey(Category, verbose_name='категория', on_delete=models.CASCADE)
 
     def __str__(self):
         return self.title
@@ -35,7 +35,7 @@ class Notebook(Product):
     processor_frec = models.CharField(max_length=255, verbose_name='Частота процессора')
     ram = models.CharField(max_length=255, verbose_name='Оперативная память')
     video = models.CharField(max_length=255, verbose_name='Видеокарта')
-    time_without_charge = models.CharField(max_length=255, verbose_name='Время работы аакумулятора')
+    time_without_charge = models.CharField(max_length=255, verbose_name='Время работы акумулятора')
 
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)
