@@ -1,8 +1,46 @@
+from PIL import Image
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.urls import reverse
 User = get_user_model()
+
+
+def get_product_url(obj, viewname):
+    ct_model = obj.__cllas__._meta.model_name
+    return reverse(viewname, kwargs={'ct_model': ct_model, 'slug': obj.slug})
+
+
+class MinResolutonErrorException(Exception):
+    pass
+
+
+class MaxResolutonErrorException(Exception):
+    pass
+
+
+class LatestProductsManager:
+
+    @staticmethod
+    def get_products_for_models(*args, **kwargs):
+        with_respect_to = kwargs.get('with_respect_to')
+        products = []
+        ct_models = ContentType.objects.filter(model__in=args)
+        for ct_model in ct_models:
+            model_products = ct_model.model_class()._base_manager.all().order_by('-id')[:5]
+            products.extend(model_products)
+        if with_respect_to:
+            ct_model = ContentType.objects.filter(model=with_respect_to)
+            if ct_model.exists():
+                if with_respect_to in args:
+                    return sorted(products, key=lambda x: x.__class__._meta.model_name.startswith(with_respect_to),
+                                  reverse=True)
+        return products
+
+
+class LatestProducts:
+    objects = LatestProductsManager()
 
 
 class Category(models.Model):
@@ -14,6 +52,9 @@ class Category(models.Model):
 
 
 class Product(models.Model):
+    VALID_RESOLUTION_MIN = (400, 400)
+    VALID_RESOLUTION_MAX = (1500, 1500)
+    MAX_IMAGE_SIZE = 3145728
 
     class Meta:
         abstract = True
@@ -28,6 +69,19 @@ class Product(models.Model):
     def __str__(self):
         return self.title
 
+    def save(self, *args, **kwargs):
+        image = self.image
+        img = Image.open(image)
+        min_width, min_height = self.VALID_RESOLUTION_MIN
+        max_width, max_height = self.VALID_RESOLUTION_MAX
+        if img.width < min_width or img.height < min_height:
+            raise MinResolutonErrorException(
+                'Загружаемое изображение ({}*{}) меньше допустимого'.format(img.width, img.height))
+        if img.width > max_width or img.height > max_height:
+            raise MaxResolutonErrorException(
+                'Загружаемое изображение ({}*{}) больше допустимого'.format(img.width, img.height))
+        super().save(*args, **kwargs)
+
 
 class Notebook(Product):
     diagonal = models.CharField(max_length=255, verbose_name='Диагональ')
@@ -39,6 +93,9 @@ class Notebook(Product):
 
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)
+
+    def get_absolut_url(self):
+        return get_product_url(self, 'product_detail')
 
 
 class Smartphone(Product):
@@ -54,6 +111,9 @@ class Smartphone(Product):
 
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)
+
+    def get_absolut_url(self):
+        return get_product_url(self, 'product_detail')
 
 
 class CartProduct(models.Model):
@@ -86,6 +146,3 @@ class Customer(models.Model):
 
     def __str__(self):
         return 'Пукупатель: {} {}'.format(self.first_name, self.last_name)
-
-
-

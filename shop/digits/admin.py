@@ -1,9 +1,36 @@
+from PIL import Image
 from django.contrib import admin
+from django.core.exceptions import ValidationError
+from django.utils.safestring import mark_safe
 from .models import *
-from django.forms import ModelChoiceField
+from django.forms import ModelChoiceField, ModelForm
+
+
+
+class NotebookAdminForm(ModelForm):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['image'].help_text = mark_safe('<span style="color:red; font-size:14px;">Загружайте картинки размером '
+                                                   'более чем {}*{}, но не более{}*{} и "весом" до 3 Мб</span>'.format(
+            *Product.VALID_RESOLUTION_MIN, *Product.VALID_RESOLUTION_MAX))
+
+    def clean_image(self):
+        image = self.cleaned_data['image']
+        img = Image.open(image)
+        min_width, min_height = Product.VALID_RESOLUTION_MIN
+        max_width, max_height = Product.VALID_RESOLUTION_MAX
+        if image.size > Product.MAX_IMAGE_SIZE:
+            raise ValidationError('Объем загружаемое изображение ({}) больше допустимого'.format(image.size))
+        if img.width < min_width or img.height < min_height:
+            raise ValidationError('Загружаемое изображение ({}*{}) меньше допустимого'.format(img.width, img.height))
+        if img.width > max_width or img.height > max_height:
+            raise ValidationError('Загружаемое изображение ({}*{}) больше допустимого'.format(img.width, img.height))
+        return image
 
 
 class NotebookAdmin(admin.ModelAdmin):
+    form = NotebookAdminForm
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == 'category':
