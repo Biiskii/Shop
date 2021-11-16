@@ -1,14 +1,29 @@
 {% extends 'base.html' %}
 
 
-{% block content%}
-  <nav aria-label="breadcrumb" class="mt-3">
-    <ol class="breadcrumb">
-      <li class="breadcrumb-item"><a href="#"> Главная </a> </li>
 
-      <li class="breadcrumb-item"><a href="#"> {{ category_detail.name }} </a> </li>
+{% block content %}
+<div class="row">
+<br>
+    <h3 style="text-align:center; margin-bottom:20px;">{{ category.name }}({{ cart.products.count }})</h3>
 
-    </ol>
-  </nav>
+{% for cat_product in  category_products %}
+  <div class="col-lg-4 col-md-6 md-4" >
+    <div class="card h-100" >
+      <a href="{{ cat_product.get_absolut_url }}"><img width="100" class="img-fluid" src="{{ cat_product.image.url}}" alt=""></a>
+        <div class="card-body" >
+          <p class="card-title">
+            <a href="{{ cat_product.get_absolut_url }}">{{ cat_product.title }}</a>
+          </p>
+          <h5>Цена: {{ cat_product.price }} руб.</h5>
+            <a href="{% url 'add_to_cart' ct_model=cat_product.get_model_name slug=cat_product.slug %}">
+            <button class="btn btn-danger">Добавить в корзину</button></a>
+        </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
 
 {% endblock %}
+

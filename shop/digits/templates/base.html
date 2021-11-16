@@ -42,17 +42,15 @@
         }
       }
 
-    .test{ float:left}
-    .row-test{padding-left:280px}
+    .test{ float:left; }
+    .row-test{padding-left:280px; height:1000px}
     </style>
 
 
   </head>
   <body>
-<div class="test" height="1000px">
-<div class="b-example-divider"></div>
-
-  <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="width: 280px;">
+<div class="test" >
+  <div class="d-flex flex-column flex-shrink-0 p-3 bg-light" style="margin-top:50px;">
     <a href="/" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
       <svg class="bi me-2" width="40" height="32"><use xlink:href="#bootstrap"/></svg>
       <span class="fs-4">Меню</span>
@@ -70,7 +68,7 @@
 
     </ul>
     <hr>
-    <div class="dropdown">
+    <div >
       <a href="#" class="d-flex align-items-center link-dark text-decoration-none dropdown-toggle" id="dropdownUser2" data-bs-toggle="dropdown" aria-expanded="false">
         <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
         <strong>mdo</strong>
@@ -108,11 +106,10 @@
   </div>
   <div class="navbar navbar-dark bg-dark shadow-sm">
     <div class="container">
-      <a href="#" class="navbar-brand d-flex align-items-center">
+      <a href="#" class="navbar-brand d-flex align-items-center"></a>
         <a class="nav-link" href="{% url 'cart' %}"><strong>Корзина:</strong> <span class="badge badge-pill badge-danger">
           {{ cart.products.count }}
         </span></a>
-      </a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarHeader" aria-controls="navbarHeader" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -124,7 +121,7 @@
 <div class="row">
 
 {% for product in products%}
-  <div class="col-lg-2 col-mt-2" >
+  <div class="col-lg-4 col-md-6 md-4 mb-4" >
     <div class="card h-100" >
       <a href="{{ product.get_absolut_url }}"><img width="100" class="img-fluid" src="{{ product.image.url}}" alt=""></a>
         <div class="card-body" >
@@ -132,6 +129,8 @@
             <a href="{{ product.get_absolut_url }}">{{ product.title }}</a>
           </p>
           <h5>Цена: {{ product.price }} руб.</h5>
+          <a href="{% url 'add_to_cart' ct_model=product.get_model_name slug=product.slug %}">
+            <button class="btn btn-danger">Добавить в корзину</button></a>
         </div>
     </div>
   </div>

@@ -18,7 +18,6 @@ class BaseView(CartMixin, View):
             'products': products,
             'cart': self.cart,
         }
-        messages.add_message(request, messages.INFO, "Товар добавлен в корзину")
         return render(request, 'base.html', context)
 
 
@@ -40,20 +39,22 @@ class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['ct_model'] = self.model._meta.model_name
+        context['cart'] = self.cart
         return context
 
 
 class CategoryDetailView(CartMixin, CategoryDetailMixin, DetailView):
 
-    def get(self, request, *args, **kwargs):
-        categories = Category.objects.get_categories_for_left_sidebar()
-        products = LatestProducts.objects.get_products_for_models(
-            'notebook', 'smartphone', with_respect_to='smartphone')
-        context = {
-            'categories': categories,
-            'products': products,
-        }
-        return render(request, 'base.html', context)
+    model = Category
+    queryset = Category.objects.all()
+    context_object_name = 'category'
+    template_name = 'category_detail.html'
+    slug_url_kwarg = 'slug'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cart'] = self.cart
+        return context
 
 
 class AddToCartView(CartMixin, View):
@@ -67,6 +68,7 @@ class AddToCartView(CartMixin, View):
         if created:
             self.cart.products.add(cart_product)
         self.cart.save()
+        messages.add_message(request, messages.INFO, "Товар ({}) добавлен в корзину".format(product.title))
         return HttpResponseRedirect('/cart/')
 
 
@@ -81,6 +83,7 @@ class DeleteFormCartView(CartMixin, View):
         self.cart.products.remove(cart_product)
         cart_product.delete()
         self.cart.save()
+        messages.add_message(request, messages.INFO, "Товар ({}) удален из корзины".format(product.title))
         return HttpResponseRedirect('/cart/')
 
 
@@ -96,9 +99,8 @@ class ChangeCollView(CartMixin, View):
         cart_product.coll = coll
         cart_product.save()
         self.cart.save()
-        messages.add_message(request, messages.INFO, "Количество товара изменено на", coll)
+        messages.add_message(request, messages.INFO, "Количество товара ({}) изменено на ({})".format(product.title, str(coll)))
         return HttpResponseRedirect('/cart/')
-
 
 
 class CartView(CartMixin, View):
