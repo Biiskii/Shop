@@ -20,14 +20,12 @@
         <td> Поддержка sd карты </td>
         <td> {{product.sd}} </td>
     </tr>
+        {% if product.sd%}
     <tr>
-        <td> Максимальный объем sd карты </td>
+        <td> Максимальный объем sd карты ГБ </td>
         <td> {{product.sd_volume}} </td>
     </tr>
-        <tr>
-        <td> Время автономной работы </td>
-        <td> {{product.time_without_charge}} </td>
-    </tr>
+    {% endif %}
     <tr>
         <td> Емкость аккумулятора </td>
         <td> {{product.accum_volume}} </td>
