@@ -33,7 +33,16 @@ td {
 }
 </style>
 <h3 class="text-center mt-5 mb-5">Ваша карзина {% if not cart.products.count %} пуста {% endif %}</h3>
-<table>
+{% if messages %}
+    {% for message in messages %}
+        <div style="margin-left: 280px; " class="alert alert-success alert-dismissible fade show" role="alert">
+             <strong>Holy guacamole!</strong> You should check in on some of those fields below.
+             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endfor %}
+
+{% endif %}
+<table style="margin-left: 280px;>
 <tr>
     <th>Наименование</th>
     <th>Изображение</th>
@@ -47,10 +56,17 @@ td {
     <td>{{ item.content_object.title }}</td>
     <td class="w-25"><img class="img-fluid" src="{{ item.content_object.image.url }}"></td>
     <td>{{ item.content_object.price }} руб.</td>
-    <td>{{ item.coll }}</td>
+    <td>
+        <form action="{% url 'change_coll_in_cart' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}" method="POST">
+            {% csrf_token %}
+            <input min="1" name="coll" type="number" class="form-control" style="width: 70px;" value="{{ item.coll }}">
+                <br>
+            <input type="submit" class="btn btn-primary" value="Изменить количество">
+        </form>
+    </td>
     <td>{{ item.final_price }} руб.</td>
     <td>
-        <a href="#">
+        <a href="{% url 'remove_from_cart' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}">
             <botton class="btn btn-danger">Удалить из корзины</botton></a>
     </td>
 </tr>

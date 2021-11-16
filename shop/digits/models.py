@@ -4,6 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.urls import reverse
+
 User = get_user_model()
 
 
@@ -44,12 +45,10 @@ class LatestProductsManager:
 
 
 class LatestProducts:
-
     objects = LatestProductsManager()
 
 
 class CategoryManager(models.Manager):
-
     CATEGORY_NAME_COUNT_NAME = {
         'Ноутбуки': 'notebook__count',
         'Смартфоны': 'smartphone__count'
@@ -112,7 +111,7 @@ class Product(models.Model):
         super().save(*args, **kwargs)
 
     def get_model_name(self):
-       return self.__class__.__name__.lower()
+        return self.__class__.__name__.lower()
 
 
 class Notebook(Product):
@@ -165,8 +164,6 @@ class CartProduct(models.Model):
         super().save(*args, **kwargs)
 
 
-
-
 class Cart(models.Model):
     owner = models.ForeignKey('Customer', null=True, verbose_name='Владелец', on_delete=models.CASCADE)
     products = models.ManyToManyField(CartProduct, blank=True, related_name='related_cart')
@@ -192,4 +189,3 @@ class Customer(models.Model):
     user = models.ForeignKey(User, verbose_name='пользователь', on_delete=models.CASCADE)
     phone = models.CharField(max_length=20, verbose_name='Номер телефона', null=True, blank=True)
     address = models.CharField(max_length=255, verbose_name='Адрес', null=True, blank=True)
-

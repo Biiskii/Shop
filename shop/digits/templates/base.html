@@ -59,6 +59,7 @@
     </a>
     <hr>
     <ul class="nav nav-pills flex-column mb-auto">
+
       {% for cat in categories %}
       <li>
         <a href="{{ cat.url }}" class="nav-link link-dark"> {{ cat.name}}({{ cat.count }})
@@ -66,6 +67,7 @@
         </a>
       </li>
       {% endfor %}
+
     </ul>
     <hr>
     <div class="dropdown">
@@ -122,13 +124,13 @@
 <div class="row">
 
 {% for product in products%}
-  <div class="col-lg-2 col-mb-2" >
+  <div class="col-lg-2 col-mt-2" >
     <div class="card h-100" >
-      <a href="{{ product.get_absolut_url }}"><img class="card-img-top" src="{{ product.image.url}}" alt=""></a>
-        <div class="card-body">
-          <h4 class="card-title">
+      <a href="{{ product.get_absolut_url }}"><img width="100" class="img-fluid" src="{{ product.image.url}}" alt=""></a>
+        <div class="card-body" >
+          <p class="card-title">
             <a href="{{ product.get_absolut_url }}">{{ product.title }}</a>
-          </h4>
+          </p>
           <h5>Цена: {{ product.price }} руб.</h5>
         </div>
     </div>

@@ -4,6 +4,7 @@ from .models import Notebook, Smartphone, Category, LatestProducts, Customer, Ca
 from .mixins import CategoryDetailMixin, CartMixin
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
+from django.contrib import messages
 
 
 class BaseView(CartMixin, View):
@@ -17,6 +18,7 @@ class BaseView(CartMixin, View):
             'products': products,
             'cart': self.cart,
         }
+        messages.add_message(request, messages.INFO, "Товар добавлен в корзину")
         return render(request, 'base.html', context)
 
 
@@ -77,8 +79,26 @@ class DeleteFormCartView(CartMixin, View):
         cart_product = CartProduct.objects.get(
             user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id)
         self.cart.products.remove(cart_product)
+        cart_product.delete()
         self.cart.save()
         return HttpResponseRedirect('/cart/')
+
+
+class ChangeCollView(CartMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        ct_model, product_slug = kwargs.get('ct_model'), kwargs.get('slug')
+        content_type = ContentType.objects.get(model=ct_model)
+        product = content_type.model_class().objects.get(slug=product_slug)
+        cart_product = CartProduct.objects.get(
+            user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id)
+        coll = int(request.POST.get('coll'))
+        cart_product.coll = coll
+        cart_product.save()
+        self.cart.save()
+        messages.add_message(request, messages.INFO, "Количество товара изменено на", coll)
+        return HttpResponseRedirect('/cart/')
+
 
 
 class CartView(CartMixin, View):
