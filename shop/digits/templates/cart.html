@@ -40,15 +40,26 @@ td {
     <th>Цена</th>
     <th>Количество</th>
     <th>Общая цена</th>
+    <th scope="col">Действие</th>
 </tr>
     {% for item in cart.products.all %}
 <tr>
     <td>{{ item.content_object.title }}</td>
     <td class="w-25"><img class="img-fluid" src="{{ item.content_object.image.url }}"></td>
-    <td>{{ item.content_object.price }}</td>
+    <td>{{ item.content_object.price }} руб.</td>
     <td>{{ item.coll }}</td>
-    <td>{{ item.final_price }}</td>
+    <td>{{ item.final_price }} руб.</td>
+    <td>
+        <a href="#">
+            <botton class="btn btn-danger">Удалить из корзины</botton></a>
+    </td>
 </tr>
     {% endfor %}
+    <tr>
+        <td colspan="2"></td>
+        <td>Итого:</td>
+        <td>{{ cart.total_products }}</td>
+        <td><strong>{{ cart.final_price }} руб.</strong></td>
+    </tr>
 </table>
 {% endblock %}
