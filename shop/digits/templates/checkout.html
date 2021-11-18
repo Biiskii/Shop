@@ -1,4 +1,6 @@
 {% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
 
 {% block content %}
 <style>
@@ -34,10 +36,11 @@ td {
   transition: .3s linear;
 }
 </style>
-<h3 class="text-center mt-5 mb-5">Ваша карзина {% if not cart.products.count %} пуста {% endif %}</h3>
+<h3 class="text-center mt-5 mb-5">Оформление заказа {% if not cart.products.count %} пуста {% endif %}</h3>
 {% if cart.products.count%}
 <table style="align:right; margin: 0 auto;">
     <tr>
+
 {% if messages %}
     {% for message in messages %}
         <div style="margin-left: 280px; " class="alert alert-success alert-dismissible fade show" role="alert">
@@ -53,26 +56,15 @@ td {
     <th>Цена</th>
     <th>Количество</th>
     <th>Общая цена</th>
-    <th scope="col">Действие</th>
 </tr>
     {% for item in cart.products.all %}
 <tr>
     <td>{{ item.content_object.title }}</td>
     <td class="w-25"><img class="img-fluid" src="{{ item.content_object.image.url }}"></td>
     <td>{{ item.content_object.price }} руб.</td>
-    <td>
-        <form action="{% url 'change_coll_in_cart' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}" method="POST">
-            {% csrf_token %}
-            <input min="1" name="coll" type="number" class="form-control" style="width: 70px;" value="{{ item.coll }}">
-                <br>
-            <input type="submit" class="btn btn-primary" value="Изменить количество" style="font-size:0.7rem;">
-        </form>
-    </td>
+
     <td>{{ item.final_price }} руб.</td>
-    <td>
-        <a href="{% url 'remove_from_cart' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}">
-            <botton class="btn btn-danger" style="font-size:0.7rem;">Удалить из корзины</botton></a>
-    </td>
+
 </tr>
     {% endfor %}
     <tr>
@@ -80,8 +72,22 @@ td {
         <td>Итого:</td>
         <td>{{ cart.total_products }}</td>
         <td><strong>{{ cart.final_price }} руб.</strong></td>
-        <td><a href="{% url 'check_out' %}"><button class="btn btn-primary" style="font-size:0.7rem;">Перейти к оформлению заказа </button></a> </td>
     </tr>
 </table>
 {% endif %}
+
+
+<h3 class="text-center mt-5 mb-5">Форма заказа</h3>
+
+<div style=" margin-left:auto;margin-right:auto;width:25em;padding:20px;outline:2px solid #aaa;">
+    <form action="" method="POST">
+        {% csrf_token %}
+
+        {{ form|crispy }}
+        <div style="text-align:center">
+            <input type="submit" class="btn btn-success  mt-3" value="Оформить заказ">
+        </div>
+    </form>
+</div>
+
 {% endblock %}

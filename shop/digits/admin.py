@@ -46,6 +46,7 @@ class SmartphoneAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
+admin.site.register(Order)
 admin.site.register(Category)
 admin.site.register(Notebook, NotebookAdmin)
 admin.site.register(Smartphone, SmartphoneAdmin)

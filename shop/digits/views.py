@@ -5,6 +5,7 @@ from .mixins import CategoryDetailMixin, CartMixin
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
+from .forms import OrderForm
 
 
 class BaseView(CartMixin, View):
@@ -112,3 +113,17 @@ class CartView(CartMixin, View):
             'categories': categories,
         }
         return render(request, 'cart.html', context)
+
+
+class CheckOutView(CartMixin, View):
+
+    def get(self, request, *args, **kwargs):
+        categories = Category.objects.get_categories_for_left_sidebar()
+        form = OrderForm(request.POST or None)
+        context = {
+            'form': form,
+            'cart': self.cart,
+            'categories': categories,
+        }
+        return render(request, 'checkout.html', context)
+
