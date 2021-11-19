@@ -6,6 +6,7 @@ from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
 from .forms import OrderForm
+from .util import recalculate_cart
 
 
 class BaseView(CartMixin, View):
@@ -45,7 +46,6 @@ class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
 
 
 class CategoryDetailView(CartMixin, CategoryDetailMixin, DetailView):
-
     model = Category
     queryset = Category.objects.all()
     context_object_name = 'category'
@@ -68,7 +68,7 @@ class AddToCartView(CartMixin, View):
             user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id)
         if created:
             self.cart.products.add(cart_product)
-        self.cart.save()
+        recalculate_cart(self.cart)
         messages.add_message(request, messages.INFO, "Товар ({}) добавлен в корзину".format(product.title))
         return HttpResponseRedirect('/cart/')
 
@@ -83,7 +83,7 @@ class DeleteFormCartView(CartMixin, View):
             user=self.cart.owner, cart=self.cart, content_type=content_type, object_id=product.id)
         self.cart.products.remove(cart_product)
         cart_product.delete()
-        self.cart.save()
+        recalculate_cart(self.cart)
         messages.add_message(request, messages.INFO, "Товар ({}) удален из корзины".format(product.title))
         return HttpResponseRedirect('/cart/')
 
@@ -99,8 +99,9 @@ class ChangeCollView(CartMixin, View):
         coll = int(request.POST.get('coll'))
         cart_product.coll = coll
         cart_product.save()
-        self.cart.save()
-        messages.add_message(request, messages.INFO, "Количество товара ({}) изменено на ({})".format(product.title, str(coll)))
+        recalculate_cart(self.cart)
+        messages.add_message(request, messages.INFO,
+                             "Количество товара ({}) изменено на ({})".format(product.title, str(coll)))
         return HttpResponseRedirect('/cart/')
 
 
@@ -127,3 +128,27 @@ class CheckOutView(CartMixin, View):
         }
         return render(request, 'checkout.html', context)
 
+
+class MakeOrderView(CartMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        form = OrderForm(request.POST or None)
+        customer = Customer.objects.get(user=request.user)
+        if form.is_valid():
+            new_order = form.save(commit=False)
+            new_order.customer = customer
+            new_order.first_name = form.cleaned_data['first_name']
+            new_order.last_name = form.cleaned_data['last_name']
+            new_order.phone = form.cleaned_data['phone']
+            new_order.address = form.cleaned_data['address']
+            new_order.buying = form.cleaned_data['buying']
+            new_order.order_date = form.cleaned_data['order_date']
+            new_order.comment = form.cleaned_data['comment']
+            new_order.save()
+            self.cart.in_order = True
+            new_order.cart = self.cart
+            new_order.save()
+            customer.orders.add(new_order)
+            messages.add_message(request, messages.INFO, 'Спасибо за заказ')
+            return HttpResponseRedirect('/')
+        return HttpResponseRedirect('checkout/')
