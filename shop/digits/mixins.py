@@ -7,13 +7,15 @@ from .models import (
     Customer,
     Notebook,
     Smartphone,
+    Fridge,
 )
 
 
 class CategoryDetailMixin(SingleObjectMixin):
     CATEGORY_SLUGPRODUCT_MODEL = {
         'notebooks': Notebook,
-        'smartphone': Smartphone
+        'smartphone': Smartphone,
+        'fridge': Fridge,
     }
 
     def get_context_data(self, **kwargs):

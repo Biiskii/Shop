@@ -80,7 +80,7 @@ td {
 <h3 class="text-center mt-5 mb-5">Форма заказа</h3>
 
 <div style=" margin-left:auto;margin-right:auto;width:25em;padding:20px;outline:2px solid #aaa;">
-    <form action="" method="POST">
+    <form action="{% url 'make_order' %}" method="POST">
         {% csrf_token %}
 
         {{ form|crispy }}

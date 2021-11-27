@@ -1,6 +1,7 @@
+from django.db import transaction
 from django.shortcuts import render
 from django.views.generic import DetailView, View
-from .models import Notebook, Smartphone, Category, LatestProducts, Customer, Cart, CartProduct, Product
+from .models import Notebook, Smartphone, Category, LatestProducts, Customer, Cart, CartProduct, Product, Fridge
 from .mixins import CategoryDetailMixin, CartMixin
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
@@ -14,7 +15,7 @@ class BaseView(CartMixin, View):
     def get(self, request, *args, **kwargs):
         categories = Category.objects.get_categories_for_left_sidebar()
         products = LatestProducts.objects.get_products_for_models(
-            'notebook', 'smartphone', with_respect_to='smartphone')
+            'notebook', 'smartphone', 'fridge',  with_respect_to='smartphone')
         context = {
             'categories': categories,
             'products': products,
@@ -27,6 +28,7 @@ class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
     CT_MODEL_MODEL_CLASS = {
         'notebook': Notebook,
         'smartphone': Smartphone,
+        'fridge': Fridge,
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -130,7 +132,7 @@ class CheckOutView(CartMixin, View):
 
 
 class MakeOrderView(CartMixin, View):
-
+    @transaction.atomic
     def post(self, request, *args, **kwargs):
         form = OrderForm(request.POST or None)
         customer = Customer.objects.get(user=request.user)
@@ -146,6 +148,7 @@ class MakeOrderView(CartMixin, View):
             new_order.comment = form.cleaned_data['comment']
             new_order.save()
             self.cart.in_order = True
+            self.cart.save()
             new_order.cart = self.cart
             new_order.save()
             customer.orders.add(new_order)

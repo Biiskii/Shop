@@ -52,19 +52,22 @@ class LatestProducts:
 class CategoryManager(models.Manager):
     CATEGORY_NAME_COUNT_NAME = {
         'Ноутбуки': 'notebook__count',
-        'Смартфоны': 'smartphone__count'
+        'Смартфоны': 'smartphone__count',
+        'Холодильники': 'fridge__count',
     }
 
     def get_queryset(self):
         return super().get_queryset()
 
     def get_categories_for_left_sidebar(self):
-        models = get_models_for_count('notebook', 'smartphone')
+        models = get_models_for_count('notebook', 'smartphone', 'fridge')
         qs = list(self.get_queryset().annotate(*models))
+        print('Начало!!!!!!!!!!!!' + str(qs.__str__().lower()))
         data = [
             dict(name=c.name, url=c.get_absolut_url(), count=getattr(c, self.CATEGORY_NAME_COUNT_NAME[c.name]))
             for c in qs
         ]
+
         return data
 
 
@@ -81,7 +84,7 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    VALID_RESOLUTION_MIN = (400, 400)
+    VALID_RESOLUTION_MIN = (300, 300)
     VALID_RESOLUTION_MAX = (1500, 1500)
     MAX_IMAGE_SIZE = 3145728
 
@@ -140,6 +143,24 @@ class Smartphone(Product):
     sd_volume = models.CharField(max_length=255, blank=True, verbose_name='Максимальный объем sd карты')
     main_cam_mp = models.CharField(max_length=255, verbose_name='Основная камера')
     frontal_cam_mp = models.CharField(max_length=255, verbose_name='Фронтальная камера')
+
+    def __str__(self):
+        return '{} : {}'.format(self.category.name, self.title)
+
+    def get_absolut_url(self):
+        return get_product_url(self, 'product_detail')
+
+
+class Fridge(Product):
+    height = models.CharField(max_length=255, verbose_name='Высота')
+    width = models.CharField(max_length=255, verbose_name=' Ширина')
+    depth = models.CharField(max_length=255, verbose_name='Глубина')
+    volume_of_the_refrigerating_chamber = models.CharField(max_length=255, verbose_name='Объем холодильной камеры')
+    freezer_capacity = models.CharField(max_length=255, verbose_name='Объем морозильной камеры')
+    no_frost = models.CharField(max_length=255, verbose_name='Система No Frost')
+    shelves_refrigerating = models.CharField(max_length=255, blank=True, verbose_name='Полок в холодильной камере')
+    shelves_freezer = models.CharField(max_length=255, verbose_name='Полок на двери хол. камеры')
+    weight = models.CharField(max_length=255, verbose_name='Вес')
 
     def __str__(self):
         return '{} : {}'.format(self.category.name, self.title)

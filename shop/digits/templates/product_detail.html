@@ -26,8 +26,13 @@
 
   {% if product.category.slug == 'notebooks'%}
       {% include 'notebook_specification.html' %}
-  {% else %}
+  {% if product.category.slug == 'smartphone' %}
       {% include 'smartphone_specification.html' %}
-  {% endif %}
+   {% if product.category.slug == 'fridge' %}
+      {% include 'fridge_specification.html' %}
+  {% endif%}
+  {% endif%}
+  {% endif%}
+
 </div>
 {% endblock %}
