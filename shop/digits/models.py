@@ -54,15 +54,15 @@ class CategoryManager(models.Manager):
         'Ноутбуки': 'notebook__count',
         'Смартфоны': 'smartphone__count',
         'Холодильники': 'fridge__count',
+        'Варочная панель': 'hob__count',
     }
 
     def get_queryset(self):
         return super().get_queryset()
 
     def get_categories_for_left_sidebar(self):
-        models = get_models_for_count('notebook', 'smartphone', 'fridge')
+        models = get_models_for_count('notebook', 'smartphone', 'fridge', 'hob')
         qs = list(self.get_queryset().annotate(*models))
-        print('Начало!!!!!!!!!!!!' + str(qs.__str__().lower()))
         data = [
             dict(name=c.name, url=c.get_absolut_url(), count=getattr(c, self.CATEGORY_NAME_COUNT_NAME[c.name]))
             for c in qs
@@ -169,6 +169,23 @@ class Fridge(Product):
         return get_product_url(self, 'product_detail')
 
 
+class Hob(Product):
+    height = models.CharField(max_length=255, verbose_name='Высота')
+    width = models.CharField(max_length=255, verbose_name=' Ширина')
+    depth = models.CharField(max_length=255, verbose_name='Глубина')
+    burners = models.CharField(max_length=255, verbose_name='Количество конфорок')
+    protection_from_children = models.CharField(max_length=255, verbose_name='Защита от детей')
+    body = models.CharField(max_length=255, verbose_name='Материал варочной поверхности')
+    weight = models.CharField(max_length=255, verbose_name='Вес')
+    color = models.CharField(max_length=255, verbose_name='Цвет')
+
+    def __str__(self):
+        return '{} : {}'.format(self.category.name, self.title)
+
+    def get_absolut_url(self):
+        return get_product_url(self, 'product_detail')
+
+
 class CartProduct(models.Model):
     user = models.ForeignKey('Customer', null=True, verbose_name='покупатель', on_delete=models.CASCADE)
     cart = models.ForeignKey('Cart', verbose_name='карзина', on_delete=models.CASCADE, related_name='relates_products')
@@ -196,6 +213,9 @@ class Cart(models.Model):
 
     def __str__(self):
         return str(self.id)
+
+    def get_absolut_url(self):
+        return get_product_url(self, 'product_detail')
 
 
 class Customer(models.Model):

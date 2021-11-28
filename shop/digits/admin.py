@@ -54,11 +54,20 @@ class FridgeAdmin(admin.ModelAdmin):
         return super().formfield_for_foreignkey(db_field, request, **kwargs)
 
 
-admin.site.register(Fridge, FridgeAdmin)
+class HobAdmin(admin.ModelAdmin):
+
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == 'category':
+            return ModelChoiceField(Category.objects.filter(slug='hob'))
+        return super().formfield_for_foreignkey(db_field, request, **kwargs)
+
+
 admin.site.register(Order)
 admin.site.register(Category)
 admin.site.register(Notebook, NotebookAdmin)
 admin.site.register(Smartphone, SmartphoneAdmin)
+admin.site.register(Fridge, FridgeAdmin)
+admin.site.register(Hob, HobAdmin)
 admin.site.register(CartProduct)
 admin.site.register(Cart)
 admin.site.register(Customer)

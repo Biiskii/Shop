@@ -57,8 +57,9 @@ td {
 </tr>
     {% for item in cart.products.all %}
 <tr>
-    <td>{{ item.content_object.title }}</td>
-    <td class="w-25"><img class="img-fluid" src="{{ item.content_object.image.url }}"></td>
+    <td> <a href="{% url 'product_detail' ct_model=item.content_object.get_model_name slug=item.content_object.slug %} "> {{ item.content_object.title }} </a></td>
+    <td class="w-25"><a href="{% url 'product_detail' ct_model=item.content_object.get_model_name slug=item.content_object.slug %} " >
+        <img class="img-fluid" src="{{ item.content_object.image.url }}"></a></td>
     <td>{{ item.content_object.price }} руб.</td>
     <td>
         <form action="{% url 'change_coll_in_cart' ct_model=item.content_object.get_model_name slug=item.content_object.slug %}" method="POST">

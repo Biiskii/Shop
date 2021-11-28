@@ -1,12 +1,15 @@
+from django.contrib.auth import logout, login
+from django.contrib.auth.views import LoginView
 from django.db import transaction
-from django.shortcuts import render
-from django.views.generic import DetailView, View
-from .models import Notebook, Smartphone, Category, LatestProducts, Customer, Cart, CartProduct, Product, Fridge
+from django.shortcuts import render, redirect
+from django.urls import reverse_lazy
+from django.views.generic import DetailView, View, CreateView
+from .models import Notebook, Smartphone, Category, LatestProducts, Customer, Cart, CartProduct, Product, Fridge, Hob
 from .mixins import CategoryDetailMixin, CartMixin
 from django.http import HttpResponseRedirect
 from django.contrib.contenttypes.models import ContentType
 from django.contrib import messages
-from .forms import OrderForm
+from .forms import OrderForm, RegisterUserForm, LoginUserForm
 from .util import recalculate_cart
 
 
@@ -15,7 +18,7 @@ class BaseView(CartMixin, View):
     def get(self, request, *args, **kwargs):
         categories = Category.objects.get_categories_for_left_sidebar()
         products = LatestProducts.objects.get_products_for_models(
-            'notebook', 'smartphone', 'fridge',  with_respect_to='smartphone')
+            'notebook', 'smartphone', 'fridge', 'hob', with_respect_to='smartphone')
         context = {
             'categories': categories,
             'products': products,
@@ -29,6 +32,7 @@ class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
         'notebook': Notebook,
         'smartphone': Smartphone,
         'fridge': Fridge,
+        'hob': Hob,
     }
 
     def dispatch(self, request, *args, **kwargs):
@@ -155,3 +159,26 @@ class MakeOrderView(CartMixin, View):
             messages.add_message(request, messages.INFO, 'Спасибо за заказ')
             return HttpResponseRedirect('/')
         return HttpResponseRedirect('checkout/')
+
+
+class RegisterUser(CartMixin, CreateView):
+    form_class = RegisterUserForm
+    template_name = 'register.html'
+
+    def form_valid(self, form):
+        user = form.save()
+        login(self.request, user)
+        return HttpResponseRedirect('/')
+
+
+class LoginUser(CartMixin, LoginView):
+    form_class = LoginUserForm
+    template_name = 'login.html'
+
+    def get_success_url(self):
+        return reverse_lazy('index')
+
+
+def logout_user(request):
+    logout(request)
+    return HttpResponseRedirect('/')

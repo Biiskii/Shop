@@ -8,6 +8,7 @@ from .models import (
     Notebook,
     Smartphone,
     Fridge,
+    Hob,
 )
 
 
@@ -16,6 +17,7 @@ class CategoryDetailMixin(SingleObjectMixin):
         'notebooks': Notebook,
         'smartphone': Smartphone,
         'fridge': Fridge,
+        'hob': Hob,
     }
 
     def get_context_data(self, **kwargs):
