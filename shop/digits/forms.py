@@ -1,20 +1,7 @@
+from captcha.fields import CaptchaField
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
-from .models import Order
-
-
-class OrderForm(forms.ModelForm):
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['order_date'].label = 'Дата получения заказа'
-
-    order_date = forms.DateField(widget=forms.TextInput(attrs={'type': 'date'}))
-
-    class Meta:
-        model = Order
-        fields = ('first_name', 'last_name', 'phone', 'address', 'buying', 'order_date', 'comment')
 
 
 class RegisterUserForm(UserCreationForm):
@@ -22,6 +9,7 @@ class RegisterUserForm(UserCreationForm):
     email = forms.EmailField(label='email', widget=forms.EmailInput(attrs={'class': 'form_email_input'}))
     password1 = forms.CharField(label='Пароль', widget=forms.PasswordInput(attrs={'class': 'form_input_pass1'}))
     password2 = forms.CharField(label='Повтор пароля', widget=forms.PasswordInput(attrs={'class': 'form_input_pass2'}))
+    captcha = CaptchaField()
 
     class Meta:
         model = User

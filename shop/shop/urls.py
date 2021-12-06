@@ -21,6 +21,9 @@ urlpatterns = [
     path('', include('digits.urls')),
     path('admin/', admin.site.urls),
 ]
+urlpatterns += [
+    path('captcha/', include('captcha.urls')),
+]
 
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

@@ -22,8 +22,6 @@
             <a href="{{ cat_product.get_absolut_url }}">{{ cat_product.title }}</a>
           </p>
           <h5>Цена: {{ cat_product.price }} руб.</h5>
-            <a href="{% url 'add_to_cart' ct_model=cat_product.get_model_name slug=cat_product.slug %}">
-            <button class="btn btn-danger">Добавить в корзину</button></a>
         </div>
     </div>
   </div>
